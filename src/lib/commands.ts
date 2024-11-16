@@ -141,12 +141,10 @@ export const uploadSettings = async (context: vscode.ExtensionContext) => {
       );
       await git.add("extensions.json");
 
-      try {
-        await git.diff(["--cached", "--exit-code"]);
+      const diff = await git.diff(["--cached"]);
+      if (diff === "") {
         vscode.window.showInformationMessage("No changes detected.");
         return;
-      } catch {
-        // Changes detected
       }
 
       progress.report({ message: "Uploading to GitHub..." });
