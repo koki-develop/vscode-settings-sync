@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import * as fs from "node:fs";
 import * as path from "node:path";
 
 export const registerCommand = (
@@ -25,6 +26,14 @@ export const uninstallExtension = async (id: string) => {
     "workbench.extensions.uninstallExtension",
     id,
   );
+};
+
+export const writeSettings = async (
+  context: vscode.ExtensionContext,
+  settingsJson: string,
+) => {
+  const settingsPath = _getSettingsPath(context);
+  fs.writeFileSync(settingsPath, settingsJson);
 };
 
 const _getPath = (context: vscode.ExtensionContext) => {
