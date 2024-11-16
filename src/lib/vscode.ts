@@ -38,6 +38,11 @@ export const listExtensions = () => {
   );
 };
 
+export const readSettings = async (context: vscode.ExtensionContext) => {
+  const settingsPath = getSettingsPath(context);
+  return fs.readFileSync(settingsPath, "utf8");
+};
+
 export const writeSettings = async (
   context: vscode.ExtensionContext,
   settingsJson: string,
@@ -46,7 +51,7 @@ export const writeSettings = async (
   fs.writeFileSync(settingsPath, settingsJson);
 };
 
-export const getSettings = async () => {
+export const getExtensionSettings = async () => {
   return vscode.workspace.getConfiguration("sync");
 };
 

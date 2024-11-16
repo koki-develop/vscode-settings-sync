@@ -19,6 +19,10 @@
       {
         "command": "settings-sync.downloadSettings",
         "title": "Sync: Download Settings"
+      },
+      {
+        "command": "settings-sync.uploadSettings",
+        "title": "Sync: Upload Settings"
       }
     ],
     "configuration": {

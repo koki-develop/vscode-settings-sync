@@ -1,5 +1,5 @@
 import type * as vscode from "vscode";
-import { downloadSettings } from "./lib/commands";
+import { downloadSettings, uploadSettings } from "./lib/commands";
 import { registerCommand } from "./lib/vscode";
 
 export function activate(context: vscode.ExtensionContext) {
@@ -7,6 +7,10 @@ export function activate(context: vscode.ExtensionContext) {
 
   registerCommand(context, "downloadSettings", async (context) => {
     await downloadSettings(context);
+  });
+
+  registerCommand(context, "uploadSettings", async (context) => {
+    await uploadSettings(context);
   });
 }
 
