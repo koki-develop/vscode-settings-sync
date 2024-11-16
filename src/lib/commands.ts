@@ -50,7 +50,7 @@ export const downloadSettings = async (context: vscode.ExtensionContext) => {
     "utf8",
   );
 
-  await writeSettings(context, JSON.parse(settingsJson));
+  await writeSettings(context, settingsJson);
 };
 
 export const uploadSettings = async (context: vscode.ExtensionContext) => {
