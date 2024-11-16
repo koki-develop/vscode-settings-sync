@@ -4,7 +4,7 @@
   "description": "VSCode settings sync extension to manage settings on GitHub and synchronize across multiple environments.",
   "icon": "assets/icon.png",
   "publisher": "koki-develop",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "engines": {
     "vscode": "^1.93.0"
   },
