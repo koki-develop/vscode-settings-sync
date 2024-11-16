@@ -1,16 +1,12 @@
 import * as vscode from "vscode";
+import { registerCommand } from "./lib/vscode";
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('Congratulations, your extension "settings-sync" is now active!');
 
-  const disposable = vscode.commands.registerCommand(
-    "settings-sync.helloWorld",
-    () => {
-      vscode.window.showInformationMessage("Hello World from settings-sync!");
-    }
-  );
-
-  context.subscriptions.push(disposable);
+  registerCommand(context, "helloWorld", () => {
+    vscode.window.showInformationMessage("Hello World from settings-sync!");
+  });
 }
 
 export function deactivate() {}
