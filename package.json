@@ -25,6 +25,16 @@
         "title": "Sync: Upload Settings"
       }
     ],
+    "keybindings": [
+      {
+        "key": "alt+shift+d",
+        "command": "settings-sync.downloadSettings"
+      },
+      {
+        "key": "alt+shift+u",
+        "command": "settings-sync.uploadSettings"
+      }
+    ],
     "configuration": {
       "properties": {
         "sync.sourceRepository": {
