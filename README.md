@@ -1,5 +1,5 @@
-# vscode-extension-template
+# settings-sync
 
 ## LICENSE
 
-[MIT](https://github.com/koki-develop/vscode-extension-template/blob/main/LICENSE)
+[MIT](https://github.com/koki-develop/vscode-settings-sync/blob/main/LICENSE)

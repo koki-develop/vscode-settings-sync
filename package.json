@@ -1,6 +1,6 @@
 {
-  "name": "vscode-extension-template",
-  "displayName": "vscode-extension-template",
+  "name": "settings-sync",
+  "displayName": "Settings Sync",
   "description": "",
   "publisher": "koki-develop",
   "version": "0.0.1",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/koki-develop/vscode-extension-template.git"
+    "url": "https://github.com/koki-develop/vscode-settings-sync.git"
   },
   "categories": ["Other"],
   "activationEvents": [],
@@ -17,7 +17,7 @@
   "contributes": {
     "commands": [
       {
-        "command": "vscode-extension-template.helloWorld",
+        "command": "settings-sync.helloWorld",
         "title": "Hello World"
       }
     ]
