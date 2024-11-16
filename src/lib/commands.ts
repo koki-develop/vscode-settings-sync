@@ -32,7 +32,7 @@ export const downloadSettings = async (context: vscode.ExtensionContext) => {
   const sourceRepositoryPath = getSourceRepositoryPath(context);
   if (!fs.existsSync(sourceRepositoryPath)) {
     fs.mkdirSync(sourceRepositoryPath, { recursive: true });
-    sh("git init", { cwd: sourceRepositoryPath });
+    sh("git init -b main", { cwd: sourceRepositoryPath });
   } else {
     sh("git remote remove origin", { cwd: sourceRepositoryPath });
   }
@@ -75,7 +75,7 @@ export const uploadSettings = async (context: vscode.ExtensionContext) => {
     fs.rmSync(sourceRepositoryPath, { recursive: true, force: true });
   }
   fs.mkdirSync(sourceRepositoryPath, { recursive: true });
-  sh("git init", { cwd: sourceRepositoryPath });
+  sh("git init -b main", { cwd: sourceRepositoryPath });
   sh(
     `git remote add origin https://${githubToken}@github.com/${sourceRepository}`,
     {
