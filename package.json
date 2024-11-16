@@ -17,8 +17,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "settings-sync.helloWorld",
-        "title": "Hello World"
+        "command": "settings-sync.downloadSettings",
+        "title": "Sync: Download Settings"
       }
     ],
     "configuration": {
