@@ -6,6 +6,7 @@ import {
   ask,
   getExtensionSettings,
   getSourceRepositoryPath,
+  listExtensions,
   readGitHubToken,
   readSettingsJson,
   writeGitHubToken,
@@ -47,6 +48,15 @@ export const uploadSettings = async (context: vscode.ExtensionContext) => {
     settingsJson,
   );
   sh("git add settings.json", { cwd: sourceRepositoryPath });
+
+  const extensionIds = listExtensions().map((extension) => extension.id);
+  const extensionsJson = JSON.stringify(extensionIds, null, 2);
+  fs.writeFileSync(
+    path.join(sourceRepositoryPath, "extensions.json"),
+    extensionsJson,
+  );
+  sh("git add extensions.json", { cwd: sourceRepositoryPath });
+
   sh(`git commit -m "Save Settings"`, { cwd: sourceRepositoryPath });
   sh("git push origin main --force", { cwd: sourceRepositoryPath });
 };
