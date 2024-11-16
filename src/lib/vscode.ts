@@ -5,11 +5,15 @@ import * as vscode from "vscode";
 export const registerCommand = (
   context: vscode.ExtensionContext,
   command: string,
-  callback: (context: vscode.ExtensionContext) => void,
+  callback: (context: vscode.ExtensionContext) => Promise<void>,
 ) => {
   const id = `settings-sync.${command}`;
-  const disposable = vscode.commands.registerCommand(id, () =>
-    callback(context),
+  const disposable = vscode.commands.registerCommand(
+    id,
+    async () =>
+      await callback(context).catch((error) => {
+        vscode.window.showErrorMessage(error.message);
+      }),
   );
   context.subscriptions.push(disposable);
 };
