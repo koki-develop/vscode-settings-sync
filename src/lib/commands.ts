@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { simpleGit } from "simple-git";
 import * as vscode from "vscode";
-import { sh } from "./util";
 import {
   ask,
   getExtensionSettings,
@@ -29,11 +29,15 @@ export const downloadSettings = async (context: vscode.ExtensionContext) => {
         const sourceRepositoryPath = getSourceRepositoryPath(context);
         const githubToken = await _loadGitHubToken(context);
 
-        await _prepareSourceRepository({
-          path: sourceRepositoryPath,
-          githubToken,
-          repository: sourceRepository,
-        });
+        await _recreateDirectory(sourceRepositoryPath);
+
+        const git = simpleGit(sourceRepositoryPath);
+        await git.init({ "--initial-branch": "main" });
+        await git.addRemote(
+          "origin",
+          `https://${githubToken}@github.com/${sourceRepository}`,
+        );
+        await git.pull(["origin", "main", "--depth=1"]);
 
         progress.report({ message: "Loading settings.json..." });
 
@@ -92,18 +96,22 @@ export const uploadSettings = async (context: vscode.ExtensionContext) => {
         const sourceRepositoryPath = getSourceRepositoryPath(context);
         const githubToken = await _loadGitHubToken(context);
 
-        await _prepareSourceRepository({
-          path: sourceRepositoryPath,
-          githubToken,
-          repository: sourceRepository,
-        });
+        await _recreateDirectory(sourceRepositoryPath);
+
+        const git = simpleGit(sourceRepositoryPath);
+        await git.init({ "--initial-branch": "main" });
+        await git.addRemote(
+          "origin",
+          `https://${githubToken}@github.com/${sourceRepository}`,
+        );
+        await git.pull(["origin", "main", "--depth=1"]);
 
         const settingsJson = await readSettingsJson(context);
         fs.writeFileSync(
           path.join(sourceRepositoryPath, "settings.json"),
           settingsJson,
         );
-        sh("git add settings.json", { cwd: sourceRepositoryPath });
+        await git.add("settings.json");
 
         const extensionIds = listExtensions().map((extension) => extension.id);
         const extensionsJson = JSON.stringify(extensionIds, null, 2);
@@ -111,12 +119,12 @@ export const uploadSettings = async (context: vscode.ExtensionContext) => {
           path.join(sourceRepositoryPath, "extensions.json"),
           extensionsJson,
         );
-        sh("git add extensions.json", { cwd: sourceRepositoryPath });
+        await git.add("extensions.json");
 
         progress.report({ message: "Uploading to GitHub..." });
 
-        sh(`git commit -m "Save Settings"`, { cwd: sourceRepositoryPath });
-        sh("git push origin main --force", { cwd: sourceRepositoryPath });
+        await git.commit("Save Settings");
+        await git.push(["origin", "main", "--force"]);
       },
     )
     .then(() => {
@@ -152,20 +160,4 @@ const _recreateDirectory = async (path: string) => {
     fs.rmSync(path, { recursive: true, force: true });
   }
   fs.mkdirSync(path, { recursive: true });
-};
-
-const _prepareSourceRepository = async (params: {
-  path: string;
-  githubToken: string;
-  repository: string;
-}) => {
-  await _recreateDirectory(params.path);
-  sh("git init -b main", { cwd: params.path });
-  sh(
-    `git remote add origin https://${params.githubToken}@github.com/${params.repository}`,
-    {
-      cwd: params.path,
-    },
-  );
-  sh("git pull origin main --depth 1", { cwd: params.path });
 };
