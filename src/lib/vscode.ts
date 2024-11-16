@@ -18,6 +18,25 @@ export const registerCommand = (
   context.subscriptions.push(disposable);
 };
 
+export const getExtensionSettings = async () => {
+  return vscode.workspace.getConfiguration("sync");
+};
+
+export const prepareDataPath = (context: vscode.ExtensionContext) => {
+  const dataPath = _getDataPath(context);
+  if (!fs.existsSync(dataPath)) {
+    fs.mkdirSync(dataPath, { recursive: true });
+  }
+};
+
+const _getDataPath = (context: vscode.ExtensionContext) => {
+  return path.join(context.extensionUri.path, "data");
+};
+
+/*
+ * extensions
+ */
+
 export const installExtension = async (id: string) => {
   await vscode.commands.executeCommand(
     "workbench.extensions.installExtension",
@@ -38,70 +57,71 @@ export const listExtensions = () => {
   );
 };
 
-export const readSettings = async (context: vscode.ExtensionContext) => {
-  const settingsPath = getSettingsPath(context);
+/*
+ * settings.json
+ */
+
+export const readSettingsJson = async (context: vscode.ExtensionContext) => {
+  const settingsPath = _getSettingsJsonPath(context);
   return fs.readFileSync(settingsPath, "utf8");
 };
 
-export const writeSettings = async (
+export const writeSettingsJson = async (
   context: vscode.ExtensionContext,
   settingsJson: string,
 ) => {
-  const settingsPath = getSettingsPath(context);
+  const settingsPath = _getSettingsJsonPath(context);
   fs.writeFileSync(settingsPath, settingsJson);
 };
 
-export const getExtensionSettings = async () => {
-  return vscode.workspace.getConfiguration("sync");
-};
-
-export const getPath = (context: vscode.ExtensionContext) => {
+const _getPath = (context: vscode.ExtensionContext) => {
   return path.resolve(context.globalStorageUri.path, "../../..");
 };
 
-export const getUserPath = (context: vscode.ExtensionContext) => {
-  return path.join(getPath(context), "User");
+const _getSettingsJsonPath = (context: vscode.ExtensionContext) => {
+  return path.join(_getPath(context), "User", "settings.json");
 };
 
-export const getSettingsPath = (context: vscode.ExtensionContext) => {
-  return path.join(getUserPath(context), "settings.json");
-};
-
-export const getExtensionPath = (context: vscode.ExtensionContext) => {
-  return context.extensionUri.path;
-};
-
-export const getGitHubTokenPath = (context: vscode.ExtensionContext) => {
-  return path.join(getExtensionPath(context), "github-token");
-};
+/*
+ * source repository
+ */
 
 export const getSourceRepositoryPath = (context: vscode.ExtensionContext) => {
-  return path.join(getExtensionPath(context), "source-repository");
+  return path.join(_getDataPath(context), "source-repository");
 };
 
-export const askGitHubToken = async () => {
-  const input = await vscode.window.showInputBox({
-    prompt: "GitHub Personal Access Token",
-    password: true,
-  });
-  return input ?? "";
-};
+/*
+ * github token
+ */
 
 export const writeGitHubToken = async (
   context: vscode.ExtensionContext,
   pat: string,
 ) => {
-  if (!pat) {
-    throw new Error("GitHub Personal Access Token is required");
-  }
-  const gitHubTokenPath = getGitHubTokenPath(context);
+  const gitHubTokenPath = _getGitHubTokenPath(context);
   fs.writeFileSync(gitHubTokenPath, pat);
 };
 
 export const readGitHubToken = async (context: vscode.ExtensionContext) => {
-  const gitHubTokenPath = getGitHubTokenPath(context);
+  const gitHubTokenPath = _getGitHubTokenPath(context);
   if (!fs.existsSync(gitHubTokenPath)) {
     return "";
   }
   return fs.readFileSync(gitHubTokenPath, "utf8");
+};
+
+const _getGitHubTokenPath = (context: vscode.ExtensionContext) => {
+  return path.join(_getDataPath(context), "github-token");
+};
+
+/*
+ * utilities
+ */
+
+export const ask = async (prompt: string) => {
+  const input = await vscode.window.showInputBox({
+    prompt,
+    password: true,
+  });
+  return input ?? "";
 };

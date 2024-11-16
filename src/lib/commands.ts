@@ -3,92 +3,96 @@ import * as path from "node:path";
 import type * as vscode from "vscode";
 import { sh } from "./util";
 import {
-  askGitHubToken,
+  ask,
   getExtensionSettings,
   getSourceRepositoryPath,
   readGitHubToken,
-  readSettings,
+  readSettingsJson,
   writeGitHubToken,
-  writeSettings,
+  writeSettingsJson,
 } from "./vscode";
 
 export const downloadSettings = async (context: vscode.ExtensionContext) => {
-  const extensionSettings = await getExtensionSettings();
-  const sourceRepository = extensionSettings.get("sourceRepository");
-  if (!sourceRepository) {
-    throw new Error("sync.sourceRepository is not set");
-  }
-
-  const githubToken = await (async () => {
-    const token = await readGitHubToken(context);
-    if (token !== "") {
-      return token;
-    }
-    const newToken = await askGitHubToken();
-    await writeGitHubToken(context, newToken);
-    return newToken;
-  })();
-
+  const sourceRepository = await _loadSourceRepository();
   const sourceRepositoryPath = getSourceRepositoryPath(context);
-  if (!fs.existsSync(sourceRepositoryPath)) {
-    fs.mkdirSync(sourceRepositoryPath, { recursive: true });
-    sh("git init -b main", { cwd: sourceRepositoryPath });
-  } else {
-    sh("git remote remove origin", { cwd: sourceRepositoryPath });
-  }
-  sh(
-    `git remote add origin https://${githubToken}@github.com/${sourceRepository}`,
-    {
-      cwd: sourceRepositoryPath,
-    },
-  );
-  sh("git fetch origin", { cwd: sourceRepositoryPath });
-  sh("git reset --hard origin/main", { cwd: sourceRepositoryPath });
+  const githubToken = await _loadGitHubToken(context);
+
+  await _prepareSourceRepository({
+    path: sourceRepositoryPath,
+    githubToken,
+    repository: sourceRepository,
+  });
 
   const settingsJson = fs.readFileSync(
     path.join(sourceRepositoryPath, "settings.json"),
     "utf8",
   );
-
-  await writeSettings(context, settingsJson);
+  await writeSettingsJson(context, settingsJson);
 };
 
 export const uploadSettings = async (context: vscode.ExtensionContext) => {
-  const extensionSettings = await getExtensionSettings();
-  const sourceRepository = extensionSettings.get("sourceRepository");
-  if (!sourceRepository) {
-    throw new Error("sync.sourceRepository is not set");
-  }
-
-  const githubToken = await (async () => {
-    const token = await readGitHubToken(context);
-    if (token !== "") {
-      return token;
-    }
-    const newToken = await askGitHubToken();
-    await writeGitHubToken(context, newToken);
-    return newToken;
-  })();
-
+  const sourceRepository = await _loadSourceRepository();
   const sourceRepositoryPath = getSourceRepositoryPath(context);
-  if (fs.existsSync(sourceRepositoryPath)) {
-    fs.rmSync(sourceRepositoryPath, { recursive: true, force: true });
-  }
-  fs.mkdirSync(sourceRepositoryPath, { recursive: true });
-  sh("git init -b main", { cwd: sourceRepositoryPath });
-  sh(
-    `git remote add origin https://${githubToken}@github.com/${sourceRepository}`,
-    {
-      cwd: sourceRepositoryPath,
-    },
-  );
+  const githubToken = await _loadGitHubToken(context);
 
-  const settingsJson = await readSettings(context);
+  await _prepareSourceRepository({
+    path: sourceRepositoryPath,
+    githubToken,
+    repository: sourceRepository,
+  });
+
+  const settingsJson = await readSettingsJson(context);
   fs.writeFileSync(
     path.join(sourceRepositoryPath, "settings.json"),
     settingsJson,
   );
   sh("git add settings.json", { cwd: sourceRepositoryPath });
-  sh(`git commit -m "Update Settings"`, { cwd: sourceRepositoryPath });
+  sh(`git commit -m "Save Settings"`, { cwd: sourceRepositoryPath });
   sh("git push origin main --force", { cwd: sourceRepositoryPath });
+};
+
+const _loadSourceRepository = async () => {
+  const extensionSettings = await getExtensionSettings();
+  const sourceRepository = extensionSettings.get<string>("sourceRepository");
+  if (!sourceRepository) {
+    throw new Error("sync.sourceRepository is not set");
+  }
+  return sourceRepository;
+};
+
+const _loadGitHubToken = async (context: vscode.ExtensionContext) => {
+  const token = await readGitHubToken(context);
+  if (token !== "") {
+    return token;
+  }
+  const newToken = await ask("GitHub Personal Access Token");
+  if (newToken === "") {
+    throw new Error("GitHub Personal Access Token is not set");
+  }
+
+  await writeGitHubToken(context, newToken);
+  return newToken;
+};
+
+const _recreateDirectory = async (path: string) => {
+  if (fs.existsSync(path)) {
+    fs.rmSync(path, { recursive: true, force: true });
+  }
+  fs.mkdirSync(path, { recursive: true });
+};
+
+const _prepareSourceRepository = async (params: {
+  path: string;
+  githubToken: string;
+  repository: string;
+}) => {
+  await _recreateDirectory(params.path);
+  sh("git init -b main", { cwd: params.path });
+  sh(
+    `git remote add origin https://${params.githubToken}@github.com/${params.repository}`,
+    {
+      cwd: params.path,
+    },
+  );
+  sh("git pull origin main --depth 1", { cwd: params.path });
 };
