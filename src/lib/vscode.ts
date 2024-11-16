@@ -1,12 +1,15 @@
 import * as vscode from "vscode";
+import * as path from "node:path";
 
 export const registerCommand = (
   context: vscode.ExtensionContext,
   command: string,
-  callback: () => void,
+  callback: (context: vscode.ExtensionContext) => void,
 ) => {
   const id = `settings-sync.${command}`;
-  const disposable = vscode.commands.registerCommand(id, callback);
+  const disposable = vscode.commands.registerCommand(id, () =>
+    callback(context),
+  );
   context.subscriptions.push(disposable);
 };
 
@@ -22,4 +25,16 @@ export const uninstallExtension = async (id: string) => {
     "workbench.extensions.uninstallExtension",
     id,
   );
+};
+
+const _getPath = (context: vscode.ExtensionContext) => {
+  return path.resolve(context.globalStorageUri.path, "../../..");
+};
+
+const _getUserPath = (context: vscode.ExtensionContext) => {
+  return path.join(_getPath(context), "User");
+};
+
+const _getSettingsPath = (context: vscode.ExtensionContext) => {
+  return path.join(_getUserPath(context), "settings.json");
 };
