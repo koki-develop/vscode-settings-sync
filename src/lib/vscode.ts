@@ -28,6 +28,12 @@ export const uninstallExtension = async (id: string) => {
   );
 };
 
+export const listExtensions = () => {
+  return vscode.extensions.all.filter(
+    (extension) => !extension.packageJSON.isBuiltin,
+  );
+};
+
 export const writeSettings = async (
   context: vscode.ExtensionContext,
   settingsJson: string,
