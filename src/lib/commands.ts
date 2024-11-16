@@ -16,128 +16,124 @@ import {
 } from "./vscode";
 
 export const downloadSettings = async (context: vscode.ExtensionContext) => {
-  await vscode.window
-    .withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: "Downloading Settings",
-      },
-      async (progress) => {
-        progress.report({ message: "Preparing..." });
+  await vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: "Downloading Settings",
+    },
+    async (progress) => {
+      progress.report({ message: "Preparing..." });
 
-        const sourceRepository = await _loadSourceRepository();
-        const sourceRepositoryPath = getSourceRepositoryPath(context);
-        const githubToken = await _loadGitHubToken(context);
+      const sourceRepository = await _loadSourceRepository();
+      const sourceRepositoryPath = getSourceRepositoryPath(context);
+      const githubToken = await _loadGitHubToken(context);
 
-        await _recreateDirectory(sourceRepositoryPath);
+      await _recreateDirectory(sourceRepositoryPath);
 
-        const git = simpleGit(sourceRepositoryPath);
-        await git.init({ "--initial-branch": "main" });
-        await git.addRemote(
-          "origin",
-          `https://${githubToken}@github.com/${sourceRepository}`,
-        );
-        await git.pull(["origin", "main", "--depth=1"]);
+      const git = simpleGit(sourceRepositoryPath);
+      await git.init({ "--initial-branch": "main" });
+      await git.addRemote(
+        "origin",
+        `https://${githubToken}@github.com/${sourceRepository}`,
+      );
+      await git.pull(["origin", "main", "--depth=1"]);
 
-        progress.report({ message: "Loading settings.json..." });
+      progress.report({ message: "Loading settings.json..." });
 
-        const settingsJson = fs.readFileSync(
-          path.join(sourceRepositoryPath, "settings.json"),
-          "utf8",
-        );
-        await writeSettingsJson(context, settingsJson);
+      const settingsJson = fs.readFileSync(
+        path.join(sourceRepositoryPath, "settings.json"),
+        "utf8",
+      );
+      await writeSettingsJson(context, settingsJson);
 
-        progress.report({ message: "Loading extensions.json..." });
+      progress.report({ message: "Loading extensions.json..." });
 
-        const extensionsJson = fs.readFileSync(
-          path.join(sourceRepositoryPath, "extensions.json"),
-          "utf8",
-        );
-        const extensionIdsToInstall = JSON.parse(extensionsJson);
-        const installedExtensionIds = listExtensions().map(
-          (extension) => extension.id,
-        );
+      const extensionsJson = fs.readFileSync(
+        path.join(sourceRepositoryPath, "extensions.json"),
+        "utf8",
+      );
+      const extensionIdsToInstall = JSON.parse(extensionsJson);
+      const installedExtensionIds = listExtensions().map(
+        (extension) => extension.id,
+      );
 
-        // install extensions
-        for (const extensionId of extensionIdsToInstall) {
-          if (installedExtensionIds.includes(extensionId)) {
-            continue;
-          }
-          progress.report({ message: `Installing ${extensionId}...` });
-          await installExtension(extensionId);
+      // install extensions
+      for (const extensionId of extensionIdsToInstall) {
+        if (installedExtensionIds.includes(extensionId)) {
+          continue;
         }
+        progress.report({ message: `Installing ${extensionId}...` });
+        await installExtension(extensionId);
+      }
 
-        // uninstall extensions
-        for (const extensionId of installedExtensionIds) {
-          if (extensionIdsToInstall.includes(extensionId)) {
-            continue;
-          }
-          progress.report({ message: `Uninstalling ${extensionId}...` });
-          await uninstallExtension(extensionId);
+      // uninstall extensions
+      for (const extensionId of installedExtensionIds) {
+        if (extensionIdsToInstall.includes(extensionId)) {
+          continue;
         }
-      },
-    )
-    .then(() => {
+        progress.report({ message: `Uninstalling ${extensionId}...` });
+        await uninstallExtension(extensionId);
+      }
+
       vscode.window.showInformationMessage("Settings downloaded successfully!");
-    });
+    },
+  );
 };
 
 export const uploadSettings = async (context: vscode.ExtensionContext) => {
-  await vscode.window
-    .withProgress(
-      {
-        location: vscode.ProgressLocation.Notification,
-        title: "Uploading Settings",
-      },
-      async (progress) => {
-        progress.report({ message: "Preparing..." });
+  await vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title: "Uploading Settings",
+    },
+    async (progress) => {
+      progress.report({ message: "Preparing..." });
 
-        const sourceRepository = await _loadSourceRepository();
-        const sourceRepositoryPath = getSourceRepositoryPath(context);
-        const githubToken = await _loadGitHubToken(context);
+      const sourceRepository = await _loadSourceRepository();
+      const sourceRepositoryPath = getSourceRepositoryPath(context);
+      const githubToken = await _loadGitHubToken(context);
 
-        await _recreateDirectory(sourceRepositoryPath);
+      await _recreateDirectory(sourceRepositoryPath);
 
-        const git = simpleGit(sourceRepositoryPath);
-        await git.init({ "--initial-branch": "main" });
-        await git.addRemote(
-          "origin",
-          `https://${githubToken}@github.com/${sourceRepository}`,
-        );
-        await git.pull(["origin", "main", "--depth=1"]);
+      const git = simpleGit(sourceRepositoryPath);
+      await git.init({ "--initial-branch": "main" });
+      await git.addRemote(
+        "origin",
+        `https://${githubToken}@github.com/${sourceRepository}`,
+      );
+      await git.pull(["origin", "main", "--depth=1"]);
 
-        const settingsJson = await readSettingsJson(context);
-        fs.writeFileSync(
-          path.join(sourceRepositoryPath, "settings.json"),
-          settingsJson,
-        );
-        await git.add("settings.json");
+      const settingsJson = await readSettingsJson(context);
+      fs.writeFileSync(
+        path.join(sourceRepositoryPath, "settings.json"),
+        settingsJson,
+      );
+      await git.add("settings.json");
 
-        const extensionIds = listExtensions().map((extension) => extension.id);
-        const extensionsJson = JSON.stringify(extensionIds, null, 2);
-        fs.writeFileSync(
-          path.join(sourceRepositoryPath, "extensions.json"),
-          extensionsJson,
-        );
-        await git.add("extensions.json");
+      const extensionIds = listExtensions().map((extension) => extension.id);
+      const extensionsJson = JSON.stringify(extensionIds, null, 2);
+      fs.writeFileSync(
+        path.join(sourceRepositoryPath, "extensions.json"),
+        extensionsJson,
+      );
+      await git.add("extensions.json");
 
-        try {
-          await git.diff(["--cached", "--exit-code"]);
-          vscode.window.showInformationMessage("No changes detected.");
-          return;
-        } catch {
-          // Changes detected
-        }
+      try {
+        await git.diff(["--cached", "--exit-code"]);
+        vscode.window.showInformationMessage("No changes detected.");
+        return;
+      } catch {
+        // Changes detected
+      }
 
-        progress.report({ message: "Uploading to GitHub..." });
+      progress.report({ message: "Uploading to GitHub..." });
 
-        await git.commit("Save Settings");
-        await git.push(["origin", "main", "--force"]);
-      },
-    )
-    .then(() => {
+      await git.commit("Save Settings");
+      await git.push(["origin", "main", "--force"]);
+
       vscode.window.showInformationMessage("Settings uploaded successfully!");
-    });
+    },
+  );
 };
 
 const _loadSourceRepository = async () => {
