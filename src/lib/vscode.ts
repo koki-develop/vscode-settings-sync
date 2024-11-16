@@ -61,3 +61,7 @@ export const getSettingsPath = (context: vscode.ExtensionContext) => {
 export const getExtensionPath = (context: vscode.ExtensionContext) => {
   return context.extensionUri.path;
 };
+
+export const getGitHubTokenPath = (context: vscode.ExtensionContext) => {
+  return path.join(getExtensionPath(context), "github-token");
+};
