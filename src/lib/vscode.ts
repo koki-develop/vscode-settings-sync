@@ -29,6 +29,10 @@ export const prepareDataPath = (context: vscode.ExtensionContext) => {
   }
 };
 
+const _getPath = (context: vscode.ExtensionContext) => {
+  return path.resolve(context.globalStorageUri.path, "../../..");
+};
+
 const _getDataPath = (context: vscode.ExtensionContext) => {
   return path.join(context.extensionUri.path, "data");
 };
@@ -65,6 +69,9 @@ export const listExtensions = () => {
 
 export const readSettingsJson = async (context: vscode.ExtensionContext) => {
   const settingsPath = _getSettingsJsonPath(context);
+  if (!fs.existsSync(settingsPath)) {
+    return "{}";
+  }
   return fs.readFileSync(settingsPath, "utf8");
 };
 
@@ -76,12 +83,32 @@ export const writeSettingsJson = async (
   fs.writeFileSync(settingsPath, settingsJson);
 };
 
-const _getPath = (context: vscode.ExtensionContext) => {
-  return path.resolve(context.globalStorageUri.path, "../../..");
-};
-
 const _getSettingsJsonPath = (context: vscode.ExtensionContext) => {
   return path.join(_getPath(context), "User", "settings.json");
+};
+
+/*
+ * keybindings.json
+ */
+
+export const readKeybindingsJson = async (context: vscode.ExtensionContext) => {
+  const keybindingsPath = _getKeybindingsJsonPath(context);
+  if (!fs.existsSync(keybindingsPath)) {
+    return "{}";
+  }
+  return fs.readFileSync(keybindingsPath, "utf8");
+};
+
+export const writeKeybindingsJson = async (
+  context: vscode.ExtensionContext,
+  keybindingsJson: string,
+) => {
+  const keybindingsPath = _getKeybindingsJsonPath(context);
+  fs.writeFileSync(keybindingsPath, keybindingsJson);
+};
+
+const _getKeybindingsJsonPath = (context: vscode.ExtensionContext) => {
+  return path.join(_getPath(context), "User", "keybindings.json");
 };
 
 /*

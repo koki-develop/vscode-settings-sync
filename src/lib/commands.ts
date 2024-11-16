@@ -9,9 +9,11 @@ import {
   installExtension,
   listExtensions,
   readGitHubToken,
+  readKeybindingsJson,
   readSettingsJson,
   uninstallExtension,
   writeGitHubToken,
+  writeKeybindingsJson,
   writeSettingsJson,
 } from "./vscode";
 
@@ -45,6 +47,14 @@ export const downloadSettings = async (context: vscode.ExtensionContext) => {
         "utf8",
       );
       await writeSettingsJson(context, settingsJson);
+
+      progress.report({ message: "Loading keybindings.json..." });
+
+      const keybindingsJson = fs.readFileSync(
+        path.join(sourceRepositoryPath, "keybindings.json"),
+        "utf8",
+      );
+      await writeKeybindingsJson(context, keybindingsJson);
 
       progress.report({ message: "Loading extensions.json..." });
 
@@ -103,12 +113,25 @@ export const uploadSettings = async (context: vscode.ExtensionContext) => {
       );
       await git.pull(["origin", "main", "--depth=1"]);
 
+      progress.report({ message: "Loading settings.json..." });
+
       const settingsJson = await readSettingsJson(context);
       fs.writeFileSync(
         path.join(sourceRepositoryPath, "settings.json"),
         settingsJson,
       );
       await git.add("settings.json");
+
+      progress.report({ message: "Loading keybindings.json..." });
+
+      const keybindingsJson = await readKeybindingsJson(context);
+      fs.writeFileSync(
+        path.join(sourceRepositoryPath, "keybindings.json"),
+        keybindingsJson,
+      );
+      await git.add("keybindings.json");
+
+      progress.report({ message: "Loading extensions..." });
 
       const extensionIds = listExtensions().map((extension) => extension.id);
       const extensionsJson = JSON.stringify(extensionIds, null, 2);
