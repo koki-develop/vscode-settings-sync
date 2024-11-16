@@ -6,9 +6,11 @@ import {
   ask,
   getExtensionSettings,
   getSourceRepositoryPath,
+  installExtension,
   listExtensions,
   readGitHubToken,
   readSettingsJson,
+  uninstallExtension,
   writeGitHubToken,
   writeSettingsJson,
 } from "./vscode";
@@ -29,6 +31,31 @@ export const downloadSettings = async (context: vscode.ExtensionContext) => {
     "utf8",
   );
   await writeSettingsJson(context, settingsJson);
+
+  const extensionsJson = fs.readFileSync(
+    path.join(sourceRepositoryPath, "extensions.json"),
+    "utf8",
+  );
+  const installedExtensionIds = listExtensions().map(
+    (extension) => extension.id,
+  );
+  const extensionIdsToInstall = JSON.parse(extensionsJson);
+
+  // install extensions
+  for (const extensionId of extensionIdsToInstall) {
+    if (installedExtensionIds.includes(extensionId)) {
+      continue;
+    }
+    await installExtension(extensionId);
+  }
+
+  // uninstall extensions
+  for (const extensionId of installedExtensionIds) {
+    if (extensionIdsToInstall.includes(extensionId)) {
+      continue;
+    }
+    await uninstallExtension(extensionId);
+  }
 };
 
 export const uploadSettings = async (context: vscode.ExtensionContext) => {
