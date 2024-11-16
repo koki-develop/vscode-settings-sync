@@ -36,6 +36,10 @@ export const writeSettings = async (
   fs.writeFileSync(settingsPath, settingsJson);
 };
 
+export const getSettings = async () => {
+  return vscode.workspace.getConfiguration("sync");
+};
+
 const _getPath = (context: vscode.ExtensionContext) => {
   return path.resolve(context.globalStorageUri.path, "../../..");
 };
