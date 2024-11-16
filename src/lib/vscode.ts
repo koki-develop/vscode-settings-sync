@@ -38,7 +38,7 @@ export const writeSettings = async (
   context: vscode.ExtensionContext,
   settingsJson: string,
 ) => {
-  const settingsPath = _getSettingsPath(context);
+  const settingsPath = getSettingsPath(context);
   fs.writeFileSync(settingsPath, settingsJson);
 };
 
@@ -46,14 +46,18 @@ export const getSettings = async () => {
   return vscode.workspace.getConfiguration("sync");
 };
 
-const _getPath = (context: vscode.ExtensionContext) => {
+export const getPath = (context: vscode.ExtensionContext) => {
   return path.resolve(context.globalStorageUri.path, "../../..");
 };
 
-const _getUserPath = (context: vscode.ExtensionContext) => {
-  return path.join(_getPath(context), "User");
+export const getUserPath = (context: vscode.ExtensionContext) => {
+  return path.join(getPath(context), "User");
 };
 
-const _getSettingsPath = (context: vscode.ExtensionContext) => {
-  return path.join(_getUserPath(context), "settings.json");
+export const getSettingsPath = (context: vscode.ExtensionContext) => {
+  return path.join(getUserPath(context), "settings.json");
+};
+
+export const getExtensionPath = (context: vscode.ExtensionContext) => {
+  return context.extensionUri.path;
 };
