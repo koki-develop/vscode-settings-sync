@@ -20,7 +20,16 @@
         "command": "settings-sync.helloWorld",
         "title": "Hello World"
       }
-    ]
+    ],
+    "configuration": {
+      "properties": {
+        "sync.sourceRepository": {
+          "type": "string",
+          "default": "",
+          "description": "GitHub repository to upload/download settings to."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
