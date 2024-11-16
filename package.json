@@ -1,6 +1,6 @@
 {
   "name": "settings-sync",
-  "displayName": "Settings Sync",
+  "displayName": "VSCode Settings Sync",
   "description": "VSCode settings sync extension to manage settings on GitHub and synchronize across multiple environments.",
   "icon": "assets/icon.png",
   "publisher": "koki-develop",
