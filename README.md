@@ -1,5 +1,8 @@
 # Settings Sync
 
+[![GitHub Release](https://img.shields.io/github/v/release/koki-develop/vscode-settings-sync)](https://github.com/koki-develop/vscode-settings-sync/releases/latest)
+[![GitHub License](https://img.shields.io/github/license/koki-develop/vscode-settings-sync)](https://github.com/koki-develop/vscode-settings-sync/blob/main/LICENSE)
+
 VSCode settings sync extension to manage settings on GitHub and synchronize across multiple environments.
 
 ## Installation
