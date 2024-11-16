@@ -65,3 +65,34 @@ export const getExtensionPath = (context: vscode.ExtensionContext) => {
 export const getGitHubTokenPath = (context: vscode.ExtensionContext) => {
   return path.join(getExtensionPath(context), "github-token");
 };
+
+export const getSourceRepositoryPath = (context: vscode.ExtensionContext) => {
+  return path.join(getExtensionPath(context), "source-repository");
+};
+
+export const askGitHubToken = async () => {
+  const input = await vscode.window.showInputBox({
+    prompt: "GitHub Personal Access Token",
+    password: true,
+  });
+  return input ?? "";
+};
+
+export const writeGitHubToken = async (
+  context: vscode.ExtensionContext,
+  pat: string,
+) => {
+  if (!pat) {
+    throw new Error("GitHub Personal Access Token is required");
+  }
+  const gitHubTokenPath = getGitHubTokenPath(context);
+  fs.writeFileSync(gitHubTokenPath, pat);
+};
+
+export const readGitHubToken = async (context: vscode.ExtensionContext) => {
+  const gitHubTokenPath = getGitHubTokenPath(context);
+  if (!fs.existsSync(gitHubTokenPath)) {
+    return "";
+  }
+  return fs.readFileSync(gitHubTokenPath, "utf8");
+};
