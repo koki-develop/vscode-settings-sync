@@ -1,6 +1,7 @@
-import type * as vscode from "vscode";
-import * as path from "node:path";
 import * as fs from "node:fs";
+import * as path from "node:path";
+import type * as vscode from "vscode";
+import { sh } from "./util";
 import {
   askGitHubToken,
   getSettings,
@@ -9,7 +10,6 @@ import {
   writeGitHubToken,
   writeSettings,
 } from "./vscode";
-import { sh } from "./util";
 
 export const downloadSettings = async (context: vscode.ExtensionContext) => {
   const settings = await getSettings();
