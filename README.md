@@ -10,8 +10,10 @@ VSCode settings sync extension to manage settings on GitHub and synchronize acro
 1. Download the `.vsix` from [GitHub Releases](https://github.com/koki-develop/vscode-settings-sync/releases/latest)
 2. Install using the `code --install-extension`.
 
-```console
+```sh
 $ code --install-extension /path/to/settings-sync-x.y.z.vsix
+# If you are using Cursor
+$ cursor --install-extension /path/to/settings-sync-x.y.z.vsix
 ```
 
 ## Usage
