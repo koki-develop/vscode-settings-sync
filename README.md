@@ -26,7 +26,7 @@ $ cursor --install-extension /path/to/settings-sync-x.y.z.vsix
 ```json5
 // settings.json
 {
-  "sync.sourceRepository": "koki-develop/vscode-settings"
+  "sync.sourceRepository": "<OWNER>/<REPO>"
 }
 ```
 
