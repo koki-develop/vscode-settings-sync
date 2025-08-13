@@ -68,12 +68,17 @@ export const downloadSettings = async (context: vscode.ExtensionContext) => {
       );
 
       // install extensions
+      const installErrors: string[] = [];
       for (const extensionId of extensionIdsToInstall) {
         if (installedExtensionIds.includes(extensionId)) {
           continue;
         }
         progress.report({ message: `Installing ${extensionId}...` });
-        await installExtension(extensionId);
+        await installExtension(extensionId).catch((error) => {
+          installErrors.push(
+            error instanceof Error ? error.message : String(error),
+          );
+        });
       }
 
       // uninstall extensions
@@ -83,6 +88,13 @@ export const downloadSettings = async (context: vscode.ExtensionContext) => {
         }
         progress.report({ message: `Uninstalling ${extensionId}...` });
         await uninstallExtension(extensionId);
+      }
+
+      // Report install errors if any
+      if (installErrors.length > 0) {
+        throw new Error(
+          `Failed to install some extensions:\n${installErrors.join("\n")}`,
+        );
       }
 
       vscode.window.showInformationMessage("Settings downloaded successfully!");
